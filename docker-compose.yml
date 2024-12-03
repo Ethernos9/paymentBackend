@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: payments
+    ports:
+      - "5432:5432"
+
+  main-server:
+    build: ./main-server
+    container_name: main-server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: ./worker
+    container_name: worker
+    depends_on:
+      - redis
+      - postgres
